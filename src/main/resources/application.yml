@@ -7,3 +7,5 @@ spring:
       host: localhost
       port: 27017
       database: nalsee
+  main:
+    allow-bean-definition-overriding: true

@@ -13,17 +13,17 @@ public class AuthenticationService {
         this.webClient = webClientBuilder.baseUrl("http://localhost:8080").build();
     }
 
-    public Mono<Void> sendEvent(String message) {
-        return webClient.post()
-                .uri("/auth/info")
-                .bodyValue(message)
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
+//    public Mono<Void> sendEvent(String message) {
+//        return webClient.post()
+//                .uri("/auth/info")
+//                .bodyValue(message)
+//                .retrieve()
+//                .bodyToMono(Void.class);
+//    }
 
     public Mono<UserInfo> getUserInfo(String accessToken) {
         return webClient.get()
-                .uri("/userInfo") // 메인 서버에서 사용자 정보를 제공하는 엔드포인트
+                .uri("/user/info") // 메인 서버에서 사용자 정보를 제공하는 엔드포인트
                 .header(accessToken) // 헤더에 accessToken 포함
                 .retrieve()
                 .bodyToMono(UserInfo.class); // UserInfo 클래스로 응답을 받음

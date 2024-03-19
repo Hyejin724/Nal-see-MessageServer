@@ -1,15 +1,13 @@
 package everycoding.NalseeFlux.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
-public class UserInfo {
-
+public class UserSession {
     private Long userId;
-    private String userName;
     private String name;
-
-
+    private String email;
+    private String roomId;
 }
