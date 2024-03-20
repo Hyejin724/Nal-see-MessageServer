@@ -24,7 +24,7 @@ public class AuthenticationService {
     public Mono<UserInfo> getUserInfo(String accessToken) {
         return webClient.get()
                 .uri("/user/info") // 메인 서버에서 사용자 정보를 제공하는 엔드포인트
-                .header(accessToken) // 헤더에 accessToken 포함
+                .header("Authorization", accessToken) // 헤더에 accessToken 포함
                 .retrieve()
                 .bodyToMono(UserInfo.class); // UserInfo 클래스로 응답을 받음
     }

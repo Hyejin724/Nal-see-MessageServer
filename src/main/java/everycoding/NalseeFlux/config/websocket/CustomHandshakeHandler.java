@@ -54,8 +54,8 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
         if (cookieHeader != null) {
             String[] cookies = cookieHeader.split("; ");
             for (String cookie : cookies) {
-                if (cookie.startsWith("Authorization=")) {
-                    return cookie.substring("Authorization=".length());
+                if (cookie.startsWith("AccessToken=")) {
+                    return cookie.substring("AccessToken=".length());
                 }
             }
         }
