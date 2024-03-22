@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+</head>
+<body>
+<h2>Chat Test</h2>
+<div>
+    <input type="text" id="userId" placeholder="Your User ID">
+    <input type="text" id="receiverId" placeholder="Receiver User ID">
+    <input type="text" id="receiverName" placeholder="Receiver User Name">
+    <input type="text" id="message" placeholder="Message">
+    <button onclick="sendMessage()">Send</button>
+</div>
+<button onclick="connect()">Connect</button>
+<button onclick="disconnect()">Disconnect</button>
+<div id="chatMessages"></div>
+
+<script type="text/javascript">
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/main');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            var userId = document.getElementById('userId').value; // 사용자 자신의 ID 입력 받음
+            var subscriptionPath = "/user/" + userId + "/sub/messages"; // 수정된 구독 경로
+            stompClient.subscribe(subscriptionPath, function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+            console.log('Subscribed to ' + subscriptionPath);
+        });
+    }
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        console.log("Disconnected");
+    }
+
+    function sendMessage() {
+        var receiverId = document.getElementById('receiverId').value;
+        var messageText = document.getElementById('message').value;
+
+        stompClient.send("/pub/chat", {}, JSON.stringify({
+            receiverId: Number(receiverId), // receiverId를 숫자로 변환, 서버측이 문자열을 받는다면 이 변환은 생략
+            content: messageText
+            // receiverName을 서버에서 요구한다면, 이곳에 추가
+        }));
+    }
+
+    function showMessage(message) {
+        var chatMessages = document.getElementById('chatMessages');
+        var messageElement = document.createElement('div');
+        messageElement.appendChild(document.createTextNode(message.sender + ": " + message.content));
+        chatMessages.appendChild(messageElement);
+    }
+</script>
+</body>
+</html>

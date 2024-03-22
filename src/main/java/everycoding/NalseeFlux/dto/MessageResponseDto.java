@@ -1,13 +1,15 @@
 package everycoding.NalseeFlux.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 @AllArgsConstructor
-public class UserSession {
+public class MessageResponseDto {
+    private String id;
     private Long userId;
     private String name;
-    private String email;
-    private String roomId;
+    private String content;
 }

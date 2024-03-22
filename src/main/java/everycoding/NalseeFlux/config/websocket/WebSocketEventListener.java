@@ -28,9 +28,12 @@ public class WebSocketEventListener {
         UserInfo userInfo = (UserInfo) sessionAttributes.get("user");
 
         if (userInfo != null) {
-            log.info("입장 사용자={}", userInfo.getName());
+            log.info("입장 사용자={}", userInfo.getUserName());
+            log.info("입장 사용자 사진 ={}", userInfo.getUserImg());
+            log.info("입장 사용자 아이디 ={}", userInfo.getUserId());
             // 사용자 세션 정보를 관리하는 Mapper에 사용자 정보를 추가합니다.
-            webSocketRoomUserSessionMapper.registerSession(headerAccessor.getSessionId(), userInfo.getUserId());
+            log.info("레지스터맵 등록확인 = {}", headerAccessor.getUser().getName());
+            webSocketRoomUserSessionMapper.registerSession(headerAccessor.getUser().getName(), userInfo);
         } else {
             log.error("인증되지 않은 사용자의 연결 시도");
         }
@@ -42,11 +45,10 @@ public class WebSocketEventListener {
         String sessionId = headerAccessor.getSessionId();
         log.info("퇴장 세션={}", sessionId);
 
-        // 사용자 세션 정보를 관리하는 Mapper에서 사용자 세션을 제거합니다.
+        // 세션 정보를 관리하는 Mapper에서 세션을 제거합니다.
         webSocketRoomUserSessionMapper.removeSession(sessionId);
 
-        // 여기에서는 특정 containerId 대신 일반적인 방식으로 상태를 전송합니다.
-        // 예를 들면, 전체 채팅 참여자 목록을 업데이트할 수 있습니다.
+        // 상태 업데이트 로직 유지
         userStateController.sendUserStateToChat();
     }
 }

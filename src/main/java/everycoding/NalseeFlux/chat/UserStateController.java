@@ -1,6 +1,7 @@
 package everycoding.NalseeFlux.chat;
 
 import everycoding.NalseeFlux.config.websocket.WebSocketRoomUserSessionMapper;
+import everycoding.NalseeFlux.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,7 +22,7 @@ public class UserStateController {
     @SubscribeMapping("/chat-list")
     public void sendUserStateToChat() {
         // 채팅 서버에 연결되어 있는 유저 ID 목록을 가져오는 메소드
-        List<Long> userIds = webSocketRoomUserSessionMapper.getAllConnectedUserIds();
+        List<UserInfo> userIds = webSocketRoomUserSessionMapper.getAllConnectedUserIds();
 
         messagingTemplate.convertAndSend(
                 "/topic/chat", // "/chat" 화면에 전송될 주소
