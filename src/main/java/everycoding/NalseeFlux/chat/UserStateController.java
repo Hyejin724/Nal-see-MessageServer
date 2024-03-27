@@ -25,7 +25,7 @@ public class UserStateController {
         List<UserInfo> userIds = webSocketRoomUserSessionMapper.getAllConnectedUserIds();
 
         messagingTemplate.convertAndSend(
-                "/topic/chat", // "/chat" 화면에 전송될 주소
+                "/sub/chat", // "/chat" 화면에 전송될 주소
                 userIds // 연결된 유저 ID 목록
         );
     }
