@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Real-time Chat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h2>Real-time Chat Room</h2>
+<div>
+    <input type="text" id="chatId" placeholder="Chat Room ID">
+    <input type="text" id="message" placeholder="Your message">
+    <button onclick="sendMessage()">Send Message</button>
+</div>
+<div id="messages"></div>
+
+<script type="text/javascript">
+    var stompClient = null;
+
+    function connect() {
+        var socket = new SockJS('/main'); // WebSocket 연결 엔드포인트입니다. 실제 경로로 변경해주세요.
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            var chatId = document.getElementById('chatId').value;
+            var subscriptionPath = "/user/sub/" + chatId + "/messages"; // 구독 경로 수정
+            stompClient.subscribe(subscriptionPath, function (message) {
+                displayMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function sendMessage() {
+        var chatId = document.getElementById('chatId').value;
+        var messageText = document.getElementById('message').value;
+        stompClient.send("/app/" + chatId + "/chat", {}, JSON.stringify({
+            content: messageText
+            // 필요한 추가 메시지 필드
+        }));
+    }
+
+    function displayMessage(message) {
+        var messagesDiv = document.getElementById('messages');
+        var messageElement = document.createElement('div');
+        messageElement.innerText = message.senderName + ": " + message.message;
+        messagesDiv.appendChild(messageElement);
+    }
+
+    // 페이지가 로드되면 WebSocket 연결 시작
+    window.onload = connect;
+</script>
+</body>
+</html>

@@ -17,22 +17,24 @@ public class Chat {
     private String id;
     private String chatId;
     private String msg;
+    private Long senderId;
     private String sender;
     private String senderImg;
-    private String receiver;
-    private String receiverImg;
+//    private String receiver;
+//    private String receiverImg;
     private LocalDateTime createAt;
 
     @Builder
 
-    public Chat(String chatId, String msg, String sender, String senderImg, String receiver, String receiverImg, LocalDateTime createAt) {
+    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, LocalDateTime createAt) {
         this.id = UUID.randomUUID().toString();
         this.chatId = chatId;
         this.msg = msg;
+        this.senderId = senderId;
         this.sender = sender;
         this.senderImg = senderImg;
-        this.receiver = receiver;
-        this.receiverImg = receiverImg;
+//        this.receiver = receiver;
+//        this.receiverImg = receiverImg;
         this.createAt = createAt;
     }
 }

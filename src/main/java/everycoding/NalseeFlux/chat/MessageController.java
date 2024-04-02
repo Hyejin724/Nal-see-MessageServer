@@ -9,18 +9,15 @@ import everycoding.NalseeFlux.service.AuthenticationService;
 import everycoding.NalseeFlux.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.messaging.Message;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 
 import java.security.Principal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.UUID;
 
 @Controller
 @Slf4j
@@ -31,10 +28,11 @@ public class MessageController {
     private final AuthenticationService authenticationService;
     private final WebSocketRoomUserSessionMapper webSocketRoomUserSessionMapper;
     private final NotificationService notificationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/chat")
-    @SendToUser("/sub/messages")
-    public Mono<MessageResponseDto> message(MessageRequestDto messageRequestDto, Principal principal) {
+    @MessageMapping("/{chatId}/chat")
+    @SendToUser("/sub/{chatId}/messages")
+    public Mono<MessageResponseDto> message(@DestinationVariable String chatId, MessageRequestDto messageRequestDto, Principal principal) {
         String sessionId = principal.getName(); // WebSocket 연결 시 설정된 세션 ID 또는 사용자 식별자 사용
         log.info("sessionId={}", sessionId);
         UserInfo userInfo = webSocketRoomUserSessionMapper.getUserInfoBySessionId(sessionId);
@@ -61,15 +59,50 @@ public class MessageController {
                 .flatMap(receiverUserInfo -> {
                     // UserInfo가 성공적으로 반환되면, 여기에서 채팅 메시지 처리를 진행합니다.
                     Chat chat = Chat.builder()
+                            .chatId(makeChatId(userInfo.getUserId(), receiverId))
                             .msg(messageRequestDto.getContent())
+                            .senderId(userInfo.getUserId())
                             .senderImg(userInfo.getUserImg())
                             .sender(userInfo.getUserName())
-                            .receiver(receiverUserInfo.getUserName())
-                            .receiverImg(receiverUserInfo.getUserImg())
                             .createAt(LocalDateTime.now()).build();
                     return chatRepository.save(chat)
                             .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), savedChat.getSender(), savedChat.getMsg()));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Receiver does not exist.")));
     }
+
+    public String makeChatId(Long receiverId, Long senderId) {
+        return senderId < receiverId ? senderId + "-" + receiverId : receiverId + "-" +senderId;
+    }
+
+//    // 메시지 조회 요청 처리 메서드
+//    @MessageMapping("/chats/{chatId}/history")
+//    public void fetchChatHistory(@DestinationVariable String chatId, Principal principal) {
+//        if (principal == null) {
+//            log.warn("Authentication required to access chat history.");
+//            return;
+//        }
+//
+//        String sessionId = principal.getName();
+//        UserInfo userInfo = webSocketRoomUserSessionMapper.getUserInfoBySessionId(sessionId);
+//        if (userInfo == null) {
+//            log.error("User info not found for sessionId: {}", sessionId);
+//            return;
+//        }
+//        String userName = userInfo.getUserName();
+//
+//        chatRepository.findByChatIdOrderByCreateAtDesc(chatId).collectList().subscribe(
+//                messages -> {
+//                    // 조회된 메시지들을 요청한 사용자에게만 실시간으로 전송
+//                    messagingTemplate.convertAndSendToUser(
+//                            userName,
+//                            "/queue/chats/history",
+//                            messages);
+//                },
+//                error -> {
+//                    log.error("Error fetching chat history", error);
+//                }
+//        );
+//    }
+
 }

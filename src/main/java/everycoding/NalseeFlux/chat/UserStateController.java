@@ -23,7 +23,7 @@ public class UserStateController {
     public void sendUserStateToChat() {
         // 채팅 서버에 연결되어 있는 유저 ID 목록을 가져오는 메소드
         List<UserInfo> userIds = webSocketRoomUserSessionMapper.getAllConnectedUserIds();
-
+        log.info("userIds={}", userIds);
         messagingTemplate.convertAndSend(
                 "/sub/chat", // "/chat" 화면에 전송될 주소
                 userIds // 연결된 유저 ID 목록
