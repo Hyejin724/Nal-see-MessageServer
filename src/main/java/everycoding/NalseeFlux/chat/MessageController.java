@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
@@ -28,10 +29,9 @@ public class MessageController {
     private final AuthenticationService authenticationService;
     private final WebSocketRoomUserSessionMapper webSocketRoomUserSessionMapper;
     private final NotificationService notificationService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/{chatId}/chat")
-    @SendToUser("/sub/{chatId}/messages")
+    @SendTo("/sub/{chatId}/chat")
     public Mono<MessageResponseDto> message(@DestinationVariable String chatId, MessageRequestDto messageRequestDto, Principal principal) {
         String sessionId = principal.getName(); // WebSocket 연결 시 설정된 세션 ID 또는 사용자 식별자 사용
         log.info("sessionId={}", sessionId);

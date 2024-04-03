@@ -22,6 +22,14 @@
         });
     });
 
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/sub/chat-list', function (messageOutput) {
+            var userList = JSON.parse(messageOutput.body);
+            displayUserList(userList);
+        });
+    });
+
     function displayUserList(userList) {
         var userListDiv = document.getElementById('userList');
         userListDiv.innerHTML = ''; // 기존 목록을 지우고 새 목록을 표시
