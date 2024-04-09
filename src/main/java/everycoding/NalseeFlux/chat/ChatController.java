@@ -1,6 +1,5 @@
 package everycoding.NalseeFlux.chat;
 
-import everycoding.NalseeFlux.config.websocket.WebSocketRoomUserSessionMapper;
 import everycoding.NalseeFlux.dto.UserInfo;
 import everycoding.NalseeFlux.service.AuthenticationService;
 import jakarta.servlet.http.Cookie;
@@ -9,18 +8,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,6 +24,7 @@ public class ChatController {
 
     private final ChatRepository chatRepository;
     private final AuthenticationService authenticationService;
+    private final ChatService chatService;
 
     @GetMapping("/chats/{chatId}")
     public Flux<Chat> getMessagesByChatId(HttpServletRequest request, @PathVariable String chatId) {
@@ -60,4 +56,25 @@ public class ChatController {
         // 검증 후 메시지 조회 및 반환
         return chatRepository.findByChatIdOrderByCreateAtDesc(chatId);
     }
+
+    @GetMapping("/chats")
+    public ResponseEntity<Flux<Chat>> getALlChatRoom(HttpServletRequest request) {
+        String accessToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("AccessToken".equals(cookie.getName())){
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        log.info("AccessToken={}", accessToken);
+        UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
+        Long userId = Objects.requireNonNull(userInfo).getUserId();
+
+        Flux<Chat> latestChatsWithUserId = chatService.getLatestChatsWithUserId(userId);
+        return ResponseEntity.ok(latestChatsWithUserId);
+    }
+
+
 }
