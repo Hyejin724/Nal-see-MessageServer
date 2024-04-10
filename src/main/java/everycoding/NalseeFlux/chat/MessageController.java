@@ -5,15 +5,13 @@ import everycoding.NalseeFlux.dto.MessageEventDto;
 import everycoding.NalseeFlux.dto.MessageRequestDto;
 import everycoding.NalseeFlux.dto.MessageResponseDto;
 import everycoding.NalseeFlux.dto.UserInfo;
-import everycoding.NalseeFlux.service.AuthenticationService;
-import everycoding.NalseeFlux.service.NotificationService;
+import everycoding.NalseeFlux.webClientService.AuthenticationService;
+import everycoding.NalseeFlux.webClientService.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
 

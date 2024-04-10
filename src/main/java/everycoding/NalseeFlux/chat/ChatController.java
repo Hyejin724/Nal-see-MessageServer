@@ -1,7 +1,7 @@
 package everycoding.NalseeFlux.chat;
 
 import everycoding.NalseeFlux.dto.UserInfo;
-import everycoding.NalseeFlux.service.AuthenticationService;
+import everycoding.NalseeFlux.webClientService.AuthenticationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +75,4 @@ public class ChatController {
         Flux<Chat> latestChatsWithUserId = chatService.getLatestChatsWithUserId(userId);
         return ResponseEntity.ok(latestChatsWithUserId);
     }
-
-
 }
