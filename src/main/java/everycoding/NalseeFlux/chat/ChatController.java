@@ -72,7 +72,11 @@ public class ChatController {
             return Flux.just(chat); // 변경하지 않은 채로 반환
         });
 
-        return updatedChats; // 업데이트된 Chat 객체들을 반환
+        return updatedChats // 업데이트된 Chat 객체들을 반환
+                .sort(Comparator.comparing(Chat::getCreateAt)) // CreateAt 기준으로 오름차순 정렬
+                .collectList() // Flux를 List로 변환
+                .flatMapMany(Flux::fromIterable); // List를 다시 Flux로 변환
+
     }
 
     @GetMapping("/chats")
