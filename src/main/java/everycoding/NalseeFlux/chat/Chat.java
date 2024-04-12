@@ -3,6 +3,7 @@ package everycoding.NalseeFlux.chat;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,12 +24,14 @@ public class Chat {
     private Long receiverId;
     private String receiver;
     private String receiverImg;
+    @Setter
+    private Integer readCnt;
 
     private LocalDateTime createAt;
 
     @Builder
 
-    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, Long receiverId, String receiver, String receiverImg, LocalDateTime createAt) {
+    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, Long receiverId, String receiver, String receiverImg, Integer readCnt, LocalDateTime createAt) {
         this.id = UUID.randomUUID().toString();
         this.chatId = chatId;
         this.msg = msg;
@@ -38,6 +41,7 @@ public class Chat {
         this.receiverId = receiverId;
         this.receiver = receiver;
         this.receiverImg = receiverImg;
+        this.readCnt = readCnt;
         this.createAt = createAt;
     }
 }

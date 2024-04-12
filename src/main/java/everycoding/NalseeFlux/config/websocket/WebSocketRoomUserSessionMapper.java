@@ -33,4 +33,5 @@ public class WebSocketRoomUserSessionMapper {
     public UserInfo getUserInfoBySessionId(String sessionId) {
         return sessionUserIdMap.get(sessionId);
     }
+
 }

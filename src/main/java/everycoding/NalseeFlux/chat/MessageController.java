@@ -28,6 +28,7 @@ public class MessageController {
     private final AuthenticationService authenticationService;
     private final WebSocketRoomUserSessionMapper webSocketRoomUserSessionMapper;
     private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
     @MessageMapping("/{chatId}/chat")
     @SendTo("/sub/{chatId}/chat")
@@ -63,7 +64,9 @@ public class MessageController {
 
         return authenticationService.checkUserExistence(receiverId)
                 .flatMap(receiverUserInfo -> {
-                    // UserInfo가 성공적으로 반환되면, 여기에서 채팅 메시지 처리를 진행합니다.
+                    boolean isReceiverSubscribed = subscriptionService.isUserSubscribed(receiverId, "/sub/"+makeChatId(userInfo.getUserId(), receiverId)+"/chat");
+                    int readCount = isReceiverSubscribed ? 0 : 1;
+
                     Chat chat = Chat.builder()
                             .chatId(makeChatId(userInfo.getUserId(), receiverId))
                             .msg(messageRequestDto.getContent())
@@ -73,11 +76,14 @@ public class MessageController {
                             .receiverId(receiverId)
                             .receiverImg(receiverInfo.getUserImg())
                             .receiver(receiverInfo.getUserName())
-                            .createAt(LocalDateTime.now()).build();
+                            .readCnt(readCount)
+                            .createAt(LocalDateTime.now())
+                            .build();
                     return chatRepository.save(chat)
                             .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), savedChat.getSender(), savedChat.getMsg()));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Receiver does not exist.")));
+
     }
 
     public String makeChatId(Long receiverId, Long senderId) {

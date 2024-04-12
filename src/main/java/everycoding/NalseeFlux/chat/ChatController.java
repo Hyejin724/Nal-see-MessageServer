@@ -13,9 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -52,9 +50,29 @@ public class ChatController {
         if (!ids.contains(userId)) {
             return Flux.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied"));
         }
+        Optional<Long> anotherIdOptional = ids.stream()
+                .filter(id -> !id.equals(userId))
+                .findFirst();
 
-        // 검증 후 메시지 조회 및 반환
-        return chatRepository.findByChatIdOrderByCreateAtDesc(chatId);
+        if (!anotherIdOptional.isPresent()) {
+            return Flux.error(new IllegalStateException("Another user ID not found"));
+        }
+
+        long anotherId = anotherIdOptional.get();
+
+            // 메시지 조회
+        Flux<Chat> chats = chatRepository.findByChatIdOrderByCreateAtAsc(chatId);
+
+        // read_cnt를 0으로 설정하고 데이터베이스에 저장
+        Flux<Chat> updatedChats = chats.flatMap(chat -> {
+            if (chat.getSenderId().equals(anotherId)) {
+                chat.setReadCnt(0);
+                return chatRepository.save(chat);
+            }
+            return Flux.just(chat); // 변경하지 않은 채로 반환
+        });
+
+        return updatedChats; // 업데이트된 Chat 객체들을 반환
     }
 
     @GetMapping("/chats")
