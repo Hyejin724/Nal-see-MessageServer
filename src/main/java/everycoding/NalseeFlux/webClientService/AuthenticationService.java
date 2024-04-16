@@ -10,8 +10,8 @@ public class AuthenticationService {
     private final WebClient webClient;
 
     public AuthenticationService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://nalsee.site:8080/").build();
-//        this.webClient = webClientBuilder.baseUrl("http://localhost:8080/").build();
+//        this.webClient = webClientBuilder.baseUrl("https://nalsee.site:8080/").build();
+        this.webClient = webClientBuilder.baseUrl("http://localhost:8080/").build();
     }
 
     public Mono<UserInfo> getUserInfo(String accessToken) {

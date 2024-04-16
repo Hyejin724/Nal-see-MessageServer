@@ -81,8 +81,8 @@ public class ChatController {
 
     }
 
-    @GetMapping(value = "/chats", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<Chat>> streamChats(HttpServletRequest request) {
+    @GetMapping("/chats")
+    public ResponseEntity<Flux<Chat>> getALlChatRoom(HttpServletRequest request) {
         String accessToken = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -92,11 +92,12 @@ public class ChatController {
                 }
             }
         }
+        log.info("AccessToken={}", accessToken);
         UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
         Long userId = Objects.requireNonNull(userInfo).getUserId();
 
-        return chatService.getLatestChatsWithUserId(userId)
-                .map(chat -> ServerSentEvent.builder(chat).build());
+        Flux<Chat> latestChatsWithUserId = chatService.getLatestChatsWithUserId(userId);
+        return ResponseEntity.ok(latestChatsWithUserId);
     }
 //
 //    @GetMapping(value = "/chatss", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
