@@ -1,12 +1,12 @@
 package everycoding.NalseeFlux.chat;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.data.mongodb.repository.Tailable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 public interface ChatRepository extends ReactiveMongoRepository<Chat, String> {
+
     Flux<Chat> findByChatIdOrderByCreateAtAsc(String chatId);
-    Mono<Chat> findFirstByChatIdOrderByCreateAtDesc(String chatId);
-    // 필요한 추가 쿼리 메서드를 정의할 수 있습니다.
+//    @Tailable
+//    Flux<Chat> findWithTailableCursorBy(); // Change stream을 위한 메서드
 }

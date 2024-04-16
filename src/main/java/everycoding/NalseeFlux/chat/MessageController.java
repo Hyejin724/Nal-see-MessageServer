@@ -80,7 +80,7 @@ public class MessageController {
                             .createAt(LocalDateTime.now())
                             .build();
                     return chatRepository.save(chat)
-                            .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), savedChat.getSender(), savedChat.getMsg()));
+                            .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), userInfo.getUserImg(), savedChat.getSender(), savedChat.getMsg()));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Receiver does not exist.")));
 

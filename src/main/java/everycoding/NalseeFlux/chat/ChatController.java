@@ -7,7 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -79,8 +81,8 @@ public class ChatController {
 
     }
 
-    @GetMapping("/chats")
-    public ResponseEntity<Flux<Chat>> getALlChatRoom(HttpServletRequest request) {
+    @GetMapping(value = "/chats", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<Chat>> streamChats(HttpServletRequest request) {
         String accessToken = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -90,11 +92,32 @@ public class ChatController {
                 }
             }
         }
-        log.info("AccessToken={}", accessToken);
         UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
         Long userId = Objects.requireNonNull(userInfo).getUserId();
 
-        Flux<Chat> latestChatsWithUserId = chatService.getLatestChatsWithUserId(userId);
-        return ResponseEntity.ok(latestChatsWithUserId);
+        return chatService.getLatestChatsWithUserId(userId)
+                .map(chat -> ServerSentEvent.builder(chat).build());
     }
+//
+//    @GetMapping(value = "/chatss", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public Flux<ServerSentEvent<ChatDto>> streamChatss(HttpServletRequest request) {
+//
+//        String accessToken = null;
+//        if (request.getCookies() != null) {
+//            for (Cookie cookie : request.getCookies()) {
+//                if ("AccessToken".equals(cookie.getName())){
+//                    accessToken = cookie.getValue();
+//                    break;
+//                }
+//            }
+//        }
+//        UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
+//        Long userId = Objects.requireNonNull(userInfo).getUserId();
+//
+//        // 기존 코드 유지
+//        return chatService.getLatestChatsWithUserIds(userId)
+//                .map(chat -> ServerSentEvent.builder(chat).build());
+//    }
+
+
 }
