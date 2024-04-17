@@ -99,26 +99,10 @@ public class ChatController {
         Flux<Chat> latestChatsWithUserId = chatService.getLatestChatsWithUserId(userId);
         return ResponseEntity.ok(latestChatsWithUserId);
     }
-//
-//    @GetMapping(value = "/chatss", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-//    public Flux<ServerSentEvent<ChatDto>> streamChatss(HttpServletRequest request) {
-//
-//        String accessToken = null;
-//        if (request.getCookies() != null) {
-//            for (Cookie cookie : request.getCookies()) {
-//                if ("AccessToken".equals(cookie.getName())){
-//                    accessToken = cookie.getValue();
-//                    break;
-//                }
-//            }
-//        }
-//        UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
-//        Long userId = Objects.requireNonNull(userInfo).getUserId();
-//
-//        // 기존 코드 유지
-//        return chatService.getLatestChatsWithUserIds(userId)
-//                .map(chat -> ServerSentEvent.builder(chat).build());
-//    }
 
-
+    @PostMapping("/delete-user")
+    public Mono<Void> deleteUserUpdate(@RequestParam Long userId) {
+        log.info("탈퇴한 사용자 처리 완료 = {}", userId);
+        return chatService.deleteUserData(userId);
+    }
 }
