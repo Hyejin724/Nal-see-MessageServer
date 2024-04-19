@@ -26,12 +26,16 @@ public class Chat {
     private String receiverImg;
     @Setter
     private Integer readCnt;
+    @Setter
+    private Long exitUserId1;
+    @Setter
+    private Long exitUserId2;
 
     private LocalDateTime createAt;
 
     @Builder
 
-    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, Long receiverId, String receiver, String receiverImg, Integer readCnt, LocalDateTime createAt) {
+    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, Long receiverId, String receiver, String receiverImg, Integer readCnt, LocalDateTime createAt, Long exitUserId1, Long exitUserId2) {
         this.id = UUID.randomUUID().toString();
         this.chatId = chatId;
         this.msg = msg;
@@ -43,5 +47,7 @@ public class Chat {
         this.receiverImg = receiverImg;
         this.readCnt = readCnt;
         this.createAt = createAt;
+        this.exitUserId1 = exitUserId1;
+        this.exitUserId2 = exitUserId2;
     }
 }

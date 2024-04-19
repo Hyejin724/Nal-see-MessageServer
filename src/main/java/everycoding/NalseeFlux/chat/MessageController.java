@@ -78,6 +78,8 @@ public class MessageController {
                             .receiver(receiverInfo.getUserName())
                             .readCnt(readCount)
                             .createAt(LocalDateTime.now())
+                            .exitUserId1(0L)
+                            .exitUserId2(0L)
                             .build();
                     return chatRepository.save(chat)
                             .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), userInfo.getUserImg(), savedChat.getSender(), savedChat.getMsg()));

@@ -62,8 +62,10 @@ public class ChatController {
 
         long anotherId = anotherIdOptional.get();
 
-            // 메시지 조회
-        Flux<Chat> chats = chatRepository.findByChatIdOrderByCreateAtAsc(chatId);
+        // 메시지 조회 exitUserId에 해당사항 없는 메시지만 조회
+        Flux<Chat> chats = chatRepository.findByChatIdOrderByCreateAtAsc(chatId)
+                .filter(chat -> !Objects.equals(chat.getExitUserId1(), userId))
+                .filter(chat -> !Objects.equals(chat.getExitUserId2(), userId));
 
         // read_cnt를 0으로 설정하고 데이터베이스에 저장
         Flux<Chat> updatedChats = chats.flatMap(chat -> {
@@ -104,5 +106,24 @@ public class ChatController {
     public Mono<Void> deleteUserUpdate(@RequestParam Long userId) {
         log.info("탈퇴한 사용자 처리 완료 = {}", userId);
         return chatService.deleteUserData(userId);
+    }
+
+    @PostMapping("/exit-room")
+    public Mono<Void> exitUserUpdate(@RequestParam String chatId, HttpServletRequest request) {
+        String accessToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("AccessToken".equals(cookie.getName())){
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        log.info("AccessToken={}", accessToken);
+        UserInfo userInfo = authenticationService.getUserInfo(accessToken).block();
+        Long userId = Objects.requireNonNull(userInfo).getUserId();
+
+        log.info("방 나간 사용자 추가 완료 = {}", chatId);
+        return chatService.exitUserData(userId, chatId);
     }
 }
