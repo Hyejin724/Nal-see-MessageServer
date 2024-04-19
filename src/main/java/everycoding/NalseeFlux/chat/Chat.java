@@ -3,6 +3,7 @@ package everycoding.NalseeFlux.chat;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,21 +21,33 @@ public class Chat {
     private Long senderId;
     private String sender;
     private String senderImg;
-//    private String receiver;
-//    private String receiverImg;
+    private Long receiverId;
+    private String receiver;
+    private String receiverImg;
+    @Setter
+    private Integer readCnt;
+    @Setter
+    private Long exitUserId1;
+    @Setter
+    private Long exitUserId2;
+
     private LocalDateTime createAt;
 
     @Builder
 
-    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, LocalDateTime createAt) {
+    public Chat(String chatId, String msg, Long senderId, String sender, String senderImg, Long receiverId, String receiver, String receiverImg, Integer readCnt, LocalDateTime createAt, Long exitUserId1, Long exitUserId2) {
         this.id = UUID.randomUUID().toString();
         this.chatId = chatId;
         this.msg = msg;
         this.senderId = senderId;
         this.sender = sender;
         this.senderImg = senderImg;
-//        this.receiver = receiver;
-//        this.receiverImg = receiverImg;
+        this.receiverId = receiverId;
+        this.receiver = receiver;
+        this.receiverImg = receiverImg;
+        this.readCnt = readCnt;
         this.createAt = createAt;
+        this.exitUserId1 = exitUserId1;
+        this.exitUserId2 = exitUserId2;
     }
 }

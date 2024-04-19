@@ -1,5 +1,6 @@
 package everycoding.NalseeFlux.webClientService;
 
+import everycoding.NalseeFlux.chat.ChatDto;
 import everycoding.NalseeFlux.dto.MessageEventDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -29,4 +30,14 @@ public class NotificationService {
                 .doOnSuccess(unused -> log.info("메시지 성공적으로 전송됨"))
                 .doOnError(error -> log.error("요청 처리 중 에러 발생", error));
     }
+
+//    public Mono<Boolean> checkOnlineUser(Long userId) {
+//        return webClient.post()
+//                .uri("/online")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .bodyValue(userId)
+//                .retrieve()
+//                .bodyToMono(Boolean.class);
+//    }
+
 }

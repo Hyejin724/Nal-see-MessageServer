@@ -30,4 +30,13 @@ public class AuthenticationService {
                 .retrieve() // 서버로부터의 응답을 검색
                 .bodyToMono(UserInfo.class); // 응답 본문을 Boolean 타입으로 변환
     }
+
+//    public Mono<UserInfo> getUserInfoById(Long userId) {
+//        return webClient.get()
+//                .uri(uriBuilder -> uriBuilder.path("/user/info") // 메인 서버에서 사용자 정보를 제공하는 엔드포인트
+//                        .queryParam("userId", userId)
+//                        .build())
+//                .retrieve()
+//                .bodyToMono(UserInfo.class); // UserInfo 클래스로 응답을 받음
+//    }
 }

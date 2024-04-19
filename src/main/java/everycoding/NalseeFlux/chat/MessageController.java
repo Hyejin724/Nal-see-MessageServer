@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Controller
 @Slf4j
@@ -27,18 +28,26 @@ public class MessageController {
     private final AuthenticationService authenticationService;
     private final WebSocketRoomUserSessionMapper webSocketRoomUserSessionMapper;
     private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
     @MessageMapping("/{chatId}/chat")
     @SendTo("/sub/{chatId}/chat")
     public Mono<MessageResponseDto> message(@DestinationVariable String chatId, MessageRequestDto messageRequestDto, Principal principal) {
+        // 로그인한 사람(내 정보) 가지고 오기
         String sessionId = principal.getName(); // WebSocket 연결 시 설정된 세션 ID 또는 사용자 식별자 사용
         log.info("sessionId={}", sessionId);
         UserInfo userInfo = webSocketRoomUserSessionMapper.getUserInfoBySessionId(sessionId);
         Long userId = userInfo.getUserId();
+
+        // messageRequestDto를 활용하여 받는사람 정보조회
         Long receiverId = messageRequestDto.getReceiverId();
         log.info("userId={}", userId);
+        //receiver Id 활용하여 상대방 이름, 이미지 가지고오는 Web Client Logic
+        UserInfo receiverInfo = authenticationService.checkUserExistence(receiverId).block();
+
+        // 메인서버에 fcm으로 전송하는 로직
         MessageEventDto build = MessageEventDto.builder()
-                .receiverName(messageRequestDto.getReceiverName())
+                .receiverName(Objects.requireNonNull(receiverInfo).getUserName())
                 .receiverId(receiverId)
                 .senderName(userInfo.getUserName())
                 .senderId(userId)
@@ -55,18 +64,28 @@ public class MessageController {
 
         return authenticationService.checkUserExistence(receiverId)
                 .flatMap(receiverUserInfo -> {
-                    // UserInfo가 성공적으로 반환되면, 여기에서 채팅 메시지 처리를 진행합니다.
+                    boolean isReceiverSubscribed = subscriptionService.isUserSubscribed(receiverId, "/sub/"+makeChatId(userInfo.getUserId(), receiverId)+"/chat");
+                    int readCount = isReceiverSubscribed ? 0 : 1;
+
                     Chat chat = Chat.builder()
                             .chatId(makeChatId(userInfo.getUserId(), receiverId))
                             .msg(messageRequestDto.getContent())
                             .senderId(userInfo.getUserId())
                             .senderImg(userInfo.getUserImg())
                             .sender(userInfo.getUserName())
-                            .createAt(LocalDateTime.now()).build();
+                            .receiverId(receiverId)
+                            .receiverImg(receiverInfo.getUserImg())
+                            .receiver(receiverInfo.getUserName())
+                            .readCnt(readCount)
+                            .createAt(LocalDateTime.now())
+                            .exitUserId1(0L)
+                            .exitUserId2(0L)
+                            .build();
                     return chatRepository.save(chat)
-                            .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), savedChat.getSender(), savedChat.getMsg()));
+                            .map(savedChat -> new MessageResponseDto(savedChat.getId(), userInfo.getUserId(), userInfo.getUserImg(), savedChat.getSender(), savedChat.getMsg()));
                 })
                 .switchIfEmpty(Mono.error(new RuntimeException("Receiver does not exist.")));
+
     }
 
     public String makeChatId(Long receiverId, Long senderId) {

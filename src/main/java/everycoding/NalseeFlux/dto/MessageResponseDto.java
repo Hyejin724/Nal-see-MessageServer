@@ -9,7 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MessageResponseDto {
     private String id;
-    private Long userId;
+    private Long senderId;
+    private String senderImg;
     private String name;
-    private String content;
+    private String msg;
 }
