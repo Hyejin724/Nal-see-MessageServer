@@ -1,6 +1,7 @@
 server:
   port: 8090
   servlet:
+    context-path: /ws
     encoding:
       charset: utf-8
       enabled: true
