@@ -43,24 +43,22 @@ public class ChatController {
         UserInfo block = userInfo.block();
         Long userId = block.getUserId();
 
-        // chatId로부터 사용자 ID 파싱
-        List<Long> ids = Arrays.stream(chatId.split("-"))
-                .map(Long::parseLong)
-                .toList();
+        StringTokenizer st = new StringTokenizer(chatId, "-");
+        long userId1 = Long.parseLong(st.nextToken());
+        long userId2 = Long.parseLong(st.nextToken());
+        long anotherId;
 
         // 현재 사용자가 채팅방에 속해 있는지 검증
-        if (!ids.contains(userId)) {
+        if (!Objects.equals(userId1, userId) && !Objects.equals(userId2, userId)) {
             return Flux.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied"));
         }
-        Optional<Long> anotherIdOptional = ids.stream()
-                .filter(id -> !id.equals(userId))
-                .findFirst();
-
-        if (!anotherIdOptional.isPresent()) {
-            return Flux.error(new IllegalStateException("Another user ID not found"));
+        if (userId1 == userId) {
+            anotherId = userId2;
+        } else if (userId2 == userId) {
+            anotherId = userId1;
+        } else {
+            anotherId = 0;
         }
-
-        long anotherId = anotherIdOptional.get();
 
         // 메시지 조회 exitUserId에 해당사항 없는 메시지만 조회
         Flux<Chat> chats = chatRepository.findByChatIdOrderByCreateAtAsc(chatId)
@@ -109,7 +107,7 @@ public class ChatController {
     }
 
     @PostMapping("/exit-room")
-    public Mono<Void> exitUserUpdate(@RequestParam String chatId, HttpServletRequest request) {
+    public ResponseEntity<Mono<Void>> exitUserUpdate(HttpServletRequest request, @RequestParam String chatId) {
         String accessToken = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -124,6 +122,6 @@ public class ChatController {
         Long userId = Objects.requireNonNull(userInfo).getUserId();
 
         log.info("방 나간 사용자 추가 완료 = {}", chatId);
-        return chatService.exitUserData(userId, chatId);
+        return ResponseEntity.ok(chatService.exitUserData(userId, chatId));
     }
 }
