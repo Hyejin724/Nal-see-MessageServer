@@ -15,7 +15,7 @@ public class NotificationService {
     private final WebClient webClient;
 
     public NotificationService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://nalsee.site:8080/").build();
+        this.webClient = webClientBuilder.baseUrl("https://k9314c9500eb3a.user-app.krampoline.com/").build();
 //        this.webClient = webClientBuilder.baseUrl("http://localhost:8080/").build();
     }
 
